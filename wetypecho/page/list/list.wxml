@@ -9,7 +9,7 @@
                 <view class="view_catpost" >
                     <!-- <image class="image_cat_thumb"  mode="aspectFit" src="{{item.thumb}}"/> -->
                     <text class="image_cat_item_title" >{{item.title}}</text>
-                    <view style="margin-left: 105px; margin-top: 10rpx;" >
+                    <view style="margin-top: 10rpx;" >
                         <image class="listpg_first_img" src="../../resources/time.png"></image>
                         <text class="list_text_view" >{{item.posttime}}</text>
                         <image class="list_img_view" src="../../resources/comments.png"></image>
