@@ -130,7 +130,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $sec = self::GET('apisec', 'null');
         self::checkApisec($sec);
         $temp = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->hiddenmid;
-        $select = $this->db->select('name','slug','type','description','mid')->from('table.metas')->where('table.metas.type = ?','category');
+        $select = $this->db->select('name','slug','type','description','mid')->from('table.metas')->where('table.metas.type = ?','category')->order('mid',Typecho_Db::SORT_DESC);
         $hiddenmids = explode(",",$temp);
         $hidden = false;
         if(sizeof($hiddenmids)>0 && intval($hiddenmids[0])) {
@@ -466,11 +466,16 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         }
         else if($mid>=0)
         {
+            $categoryListWidget = $this->widget('Widget_Metas_Category_List', 'current='.$mid);
+            $category = $categoryListWidget->filter($category);
+            $children = $categoryListWidget->getAllChildren($category['mid']);
+            $children[] = $category['mid'];
+            
             $limit = 0;
             if($except != 'null') {
-                $posts = $this->db->fetchAll($this->db->select('cid','mid')->from('table.relationships')->where('mid = ?', $mid)->where('cid != ?', $except));
+                $posts = $this->db->fetchAll($this->db->select('cid','mid')->from('table.relationships')->where('mid IN ?', $children)->where('cid != ?', $except));
             } else {
-            $posts = $this->db->fetchAll($this->db->select('cid','mid')->from('table.relationships')->where('mid = ?', $mid));
+                $posts = $this->db->fetchAll($this->db->select('cid','mid')->from('table.relationships')->where('mid IN ?', $children));
             }
             foreach($posts as $post) {
                 $temp = $this->db->fetchAll($this->db->select('cid', 'title', 'created','commentsNum', 'views', 'likes')->from('table.contents')->where('cid = ?', $post['cid'])->where('status = ?', 'publish'));
