@@ -43,7 +43,6 @@ Page({
     qrcode_temp: '',
     painting: {},
     cmbtnclick: false,
-    resendUrl: API.GetDomain() + 'usr/plugins/WeTypecho/res/resend.png',
     related_post:[],
     display_related: 'none',
   },
