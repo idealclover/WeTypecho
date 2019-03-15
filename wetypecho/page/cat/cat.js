@@ -110,7 +110,7 @@ Page({
         });
         that.setData({
           allrankpostlist: that.data.allrankpostlist,
-          postheight: that.data.allrankpostlist[idx].length * 145 + 'rpx',
+          postheight: that.data.allrankpostlist[idx].length * 140 + 'rpx',
         })
       }
     })
