@@ -97,7 +97,7 @@ Page({
           });
           that.setData({
             allcatpostlist: that.data.allcatpostlist,
-            postheight: that.data.allcatpostlist[idx].length * 145 + 'rpx'
+            postheight: that.data.allcatpostlist[idx].length * 140 + 'rpx'
           })
         } else {
           wx.showToast({
