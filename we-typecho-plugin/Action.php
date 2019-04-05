@@ -566,10 +566,13 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $sec = self::GET('apisec', 'null');
         self::checkApisec($sec);
         $cid = self::GET('cid', -1);
-        $comments = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
+        $comments = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg', 'mail')->from('table.comments')->where('cid = ?', $cid)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
         $result = array();
         //获取根评论
         foreach ($comments as $comment) {
+            if($comment['authorImg'] == null){
+                $comment['authorImg'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower(trim($comment['mail']))) . '?d=https://idealclover.top/usr/themes/clover/assets/default.jpg'
+            }
             if($comment['parent'] == 0) {
                 $result[] = $comment;
             }
@@ -578,7 +581,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         foreach($comments as $comment) {
             if($comment['parent'] != 0) {
                 $parent = $comment['parent'];
-                $temp = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $parent)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
+                $temp = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg', 'mail')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $parent)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
                 if(sizeof($temp)>0)
                 {
                     while($temp[0]['parent']!=0)
