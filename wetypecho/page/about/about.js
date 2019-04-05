@@ -70,7 +70,7 @@ Page({
       }
     })
   },
-  eventRun_bind_tap (event) {
+  __bind_tap (event) {
     var href = event.target.dataset._el.attr.href;
     if(API.IsNull(href)) {
       var cidaddr = href.search('cid=');
@@ -127,10 +127,14 @@ Page({
       url:API.Getuserlikedlist(cid),
       success: function(res) {
         var datas = res.data.data;
+        console.log("QAQ")
         if(datas != null && datas != undefined) {
+          console.log(datas.length)
+          console.log(that.data.item.likes)
           if(datas.length < that.data.item.likes)
           {
             var cnt = that.data.item.likes - datas.length;
+            console.log(cnt);
             for(var i=0; i< cnt; i++)
               {
                 var user = new likemember('网页用户','../../resources/zhihu.jpg')

@@ -54,17 +54,16 @@ Page({
   onLoad (options) {
     this.data.cid = options.item;
   },
-  eventRun_bind_tap (event) {
+  __bind_tap (event) {
     var href = event.target.dataset._el.attr.href;
     if(API.IsNull(href)) {
       var cidaddr = href.search('cid=');
-      if( -1 != href.search(API.GetDomain()) && -1 != cidaddr ) {
-
-          var end = href.search('.html');
-          var cid = href.substring(cidaddr+4,end);
-          wx.navigateTo({
-            url: '../detail/detail?item=' + cid,
-          })
+      if (-1 != href.search(API.GetDomain()) && -1 != cidaddr) {
+        // var end = href.search('archives');
+        // var cid = href.substring(cidaddr+4,end);
+        // wx.navigateTo({
+        //   url: '../detail/detail?item=' + cid,
+        // })
       } else {
       wx.setClipboardData({
           data: href,
