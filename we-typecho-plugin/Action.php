@@ -137,6 +137,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $select->where('mid in ?', $hiddenmids);
         $hidden = true;
         }
+
         $cat = $this->db->fetchAll($select);
         if(!$hidden) {
         $cat_recent = $cat[0];
@@ -415,14 +416,17 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $text = self::GET('text', "None");
         $parent = self::GET('parent', 0);
         $headicon = self::GET('icon', "NULL");
+        $formid = self::GET('formid', "NULL");
+        $openid = self::GET('openid', "NULL");
 
         $coid =$this->db->query($this->db->insert('table.comments')->rows(array('cid' => $cid, 'created' => time(), 'author' => $author, 'authorId' => '0',
-                'ownerId' => '1', 'mail' => 'wx@wx.com', 'url' => 'NULL', 'ip' =>'8.8.8.8', 'agent' => 'wx-miniprogram', 'text' => $text, 'type' => 'comment',
+                'ownerId' => '1', 'mail' => $openid.'@wx.com', 'url' => 'NULL', 'ip' =>'8.8.8.8', 'agent' => 'wx-miniprogram', 'text' => $text, 'type' => 'comment',
                 'status' => 'approved', 'parent' => $parent,
                 'authorImg' => $headicon )));
         if($coid>0) {
             $row = $this->db->fetchRow($this->db->select('commentsNum')->from('table.contents')->where('cid = ?', $cid));
             $this->db->query($this->db->update('table.contents')->rows(array('commentsNum' => (int)$row['commentsNum']+1))->where('cid = ?', $cid));
+            $this->db->query($this->db->update('table.wetypecho')->rows(array('formid' => $formid ))->where('openid = ?', $openid));
         }
         $this->export($coid);
     }
@@ -467,10 +471,8 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         else if($mid>=0)
         {
             $categoryListWidget = $this->widget('Widget_Metas_Category_List', 'current='.$mid);
-            $category = $categoryListWidget->filter($category);
-            $children = $categoryListWidget->getAllChildren($category['mid']);
-            $children[] = $category['mid'];
-            
+            $children = $categoryListWidget->getAllChildren($mid);
+            $children[] = $mid;
             $limit = 0;
             if($except != 'null') {
                 $posts = $this->db->fetchAll($this->db->select('cid','mid')->from('table.relationships')->where('mid IN ?', $children)->where('cid != ?', $except));
@@ -543,7 +545,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
                 if(sizeof($post)>0 && $post[0]!=null) {
                     $post[0]        = $this->widget("Widget_Abstract_Contents")->push($post[0]);
                     $post[0]['tag'] = $this->db->fetchAll($this->db->select('name')->from('table.metas')->join('table.relationships', 'table.metas.mid = table.relationships.mid', Typecho_DB::LEFT_JOIN)->where('table.relationships.cid = ?', $cid)->where('table.metas.type = ?', 'tag'));
-                    $post[0]['thumb'] = $this->db->fetchAll($this->db->select('name', 'str_value')->from('table.fields')->where('cid = ?', $cid))?$this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $cid)):array(array("trumb"=>"https://api.isoyu.com/bing_images.php"));
+                    $post[0]['thumb'] = $this->db->fetchAll($this->db->select('name','str_value')->from('table.fields')->where('cid = ?', $cid))?$this->db->fetchAll($this->db->select('name', 'str_value')->from('table.fields')->where('cid = ?', $cid)):array(array("name"=>"thumb", "str_value"=>"https://api.isoyu.com/bing_images.php"));
                     $post[0]['views'] = $this->db->fetchAll($this->db->select('views')->from('table.contents')->where('table.contents.cid = ?', $cid));
                     $post[0]['likes'] = $this->db->fetchAll($this->db->select('likes')->from('table.contents')->where('table.contents.cid = ?', $cid));
                     $result[]    = $post[0];

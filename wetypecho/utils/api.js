@@ -55,8 +55,8 @@ module.exports = {
     GetPostsReplybyCID: function(cid, parent){
         return this.appendAPISEC(API_URL + 'getcomment?cid=' + cid + '&parent=' + parent);
     },
-    Postcomment: function(cid,author,text,parent,icon) {
-        return this.appendAPISEC(API_URL + 'addcomment?cid=' + cid + '&author=' + author + '&text=' + text + '&parent=' + parent + '&icon=' + icon);
+    Postcomment: function(cid, openid, author,text,parent,icon,formid) {
+      return this.appendAPISEC(API_URL + 'addcomment?cid=' + cid + '&openid=' + openid + '&author=' + author + '&text=' + text + '&parent=' + parent + '&icon=' + icon + '&formid=' + formid);
     },
     Login: function(userInfo) {
         return this.appendAPISEC(API_URL + 'login?code=' + userInfo.code + '&nickname=' + userInfo.nickName + '&avatarUrl=' + userInfo.avatarUrl + '&city=' + userInfo.city + '&country=' + userInfo.country + '&gender=' + userInfo.gender + '&province=' + userInfo.province);

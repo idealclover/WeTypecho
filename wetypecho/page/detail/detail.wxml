@@ -30,6 +30,9 @@
     </scroll-view>
 </view>
 <template is="entry" data="{{...content}}" bindtap="clicklink" />
+<!-- <view style="display: flex;margin-left: 16rpx; margin-bottom: 16rpx;" >
+  <navigator class="nav_cat_item" hover-class="navigator-hover" url="../index/index"><text>回到主页</text></navigator>
+</view> -->
 <view class="minheight view_section" >
     <text class="m-block text_section_title" >{{item.likes}}人赞 </text>
     <scroll-view class="m_border" lower-threshold="50" scroll-x="True" style="width: 100%; overflow-x: auto; overflow-y: hidden; " upper-threshold="50">
@@ -96,9 +99,10 @@
     </view>
 <view class="comment-fixed">
     <view class="comment-respond">
+        <form bindsubmit="sendcm" report-submit='true'>
         <view class="comment-box">
             <input class="comment-input" type='text' bindinput="cminput" value="{{cmtext}}" placeholder="{{cmplaceholder}}" bindblur="cmloss" focus="{{focus}}" bindfocus="cmfocus" />
-            <button class="comment-button touch-active" formType="submit" bindtap = "sendcm">发送</button>
+            <button class="comment-button touch-active" form-type="submit">发送</button>
             <view class="cmview" bindtap="zanstart">
                 <image src="{{zanimg}}" class="img-plus" mode="scaleToFill"></image>
                 <text class="cmicontext">{{item.likes}}赞</text>
@@ -117,6 +121,7 @@
                 <text class="cmicontext">分享</text>
             </view>
         </view>
+        </form>
     </view>
     </view>
 </view>

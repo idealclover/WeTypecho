@@ -33,13 +33,31 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 0,
+			"current": 3,
 			"list": [
 				{
 					"id": -1,
 					"name": "搜索",
 					"pathName": "page/list/list",
 					"query": "keyword=QAQ"
+				},
+				{
+					"id": -1,
+					"name": "about",
+					"pathName": "page/about/about",
+					"query": ""
+				},
+				{
+					"id": 2,
+					"name": "detail",
+					"pathName": "page/detail/detail",
+					"query": "item=545"
+				},
+				{
+					"id": -1,
+					"name": "index-detail",
+					"pathName": "page/index/index",
+					"query": "item=545"
 				}
 			]
 		}
