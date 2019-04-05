@@ -155,7 +155,7 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad () {
+  onLoad(options) {
     wx.getUserInfo({
       success: function(res) {
         app.Data.userInfo = res.userInfo;
@@ -168,6 +168,11 @@ Page({
               success: function(res) {
                 var datas = res.data.data;
                 app.Data.userInfo.openid = datas;
+                if(options.item){
+                  wx.navigateTo({
+                    url: '../detail/detail?item=' + options.item,
+                  })
+                }
               },
               fail: function() {
               }

@@ -28,6 +28,7 @@ Page({
     vcomment: [],
     commentlist: [],
     thispath: 'page/detail/detail',
+    thatpath: 'page/index/index',
     cid: 0,
     hiddenmodalput:true,
     replaycoid: '',
@@ -238,7 +239,9 @@ Page({
    * 生命周期函数--监听页面卸载
    */
   onUnload () {
-
+    wx.navigateTo({
+      url: '../index/index',
+    })
   },
 
   /**
@@ -297,7 +300,7 @@ Page({
     }
   },
 
-  sendcm: function() {
+  sendcm: function(e) {
     var that = this;
     that.setData({
       cmbtnclick: true
@@ -309,8 +312,9 @@ Page({
           this.data.replaycoid = 0;
         }
         this.data.replyauthor = true;
+        console.log(e.detail.formId);
         Net.request({
-          url: API.Postcomment(that.data.item.cid,app.Data.userInfo.nickName,that.data.cmtext,that.data.replaycoid,app.Data.userInfo.avatarUrl),
+          url: API.Postcomment(that.data.item.cid, app.Data.userInfo.openid, app.Data.userInfo.nickName, that.data.cmtext, that.data.replaycoid, app.Data.userInfo.avatarUrl, e.detail.formId),
           success: function(res) {
             that.getcomments(that.data.item.cid);
             that.setData ({
@@ -356,7 +360,7 @@ Page({
     var that = this;
     if( API.loginsuccess(app)) {
       wx.navigateTo({
-        url: '../share/share?nickName=' + app.Data.userInfo.nickName + "&thumb=" + that.data.item.thumb + "&title=" + that.data.item.title + "&path=" + that.data.thispath + "&cid=" + that.data.cid,
+        url: '../share/share?nickName=' + app.Data.userInfo.nickName + "&thumb=" + that.data.item.thumb + "&title=" + that.data.item.title + "&path=" + that.data.thatpath + "&cid=" + that.data.cid,
       })
     } else{
       API.ConfirmAuth();
@@ -377,7 +381,7 @@ Page({
     }
     return {
       title: this.data.item.title,
-      path: this.data.item.thispath,
+      path: this.data.item.thatpath,
       success: function (res) {
         // 转发成功
       },
