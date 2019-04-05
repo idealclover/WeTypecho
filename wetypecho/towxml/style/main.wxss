@@ -339,6 +339,7 @@
 .h2w__b,
 .h2w__strong,
 .h2w__i,
+.h2w__s,
 .h2w__em {
     display: inline;
 }
