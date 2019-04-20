@@ -23,13 +23,13 @@ Page({
       url: API.GetPosts(),
       success: function(res) {
         var datas = res.data.data;
-        that.setData({          
+        that.setData({
           allpostslist: datas.map(function (ori_item){
             var item = API.ParseItem(ori_item);
-            item.posttime = API.getcreatedtime(item.created);            
+            item.posttime = API.getcreatedtime(item.created);
             return item;
           })
-        })        
+        })
       }
     })
   },
@@ -38,12 +38,12 @@ Page({
     Net.request({
       url: API.Search(keyword),
       success: function(res) {
-        var datas = res.data.data;        
+        var datas = res.data.data;
         if(datas != 'none') {
           that.setData({
             allpostslist: datas.map(function (ori_item){
               var item = API.ParseItem(ori_item);
-              item.posttime = API.getcreatedtime(item.created);  
+              item.posttime = API.getcreatedtime(item.created);
               return item;
             })
           })
@@ -63,7 +63,7 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad (e) {    
+  onLoad (e) {
     if(JSON.stringify(e) == "{}") {
       this.fetchposts();
       this.setData({
@@ -93,7 +93,7 @@ Page({
           that.setData({
             allpostslist: datas.map(function (item){
               item.posttime = API.getcreatedtime(item.created);
-              item.thumb = item.thumb[0].str_value;
+              // item.thumb = item.thumb[0].str_value;
               return item;
             })
           })
@@ -143,6 +143,5 @@ Page({
 
 
   //以下为自定义点击事件
-  
-})
 
+})
