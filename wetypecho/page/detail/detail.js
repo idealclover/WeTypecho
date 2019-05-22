@@ -311,7 +311,6 @@ Page({
           this.data.replaycoid = 0;
         }
         this.data.replyauthor = true;
-        console.log(e.detail.formId);
         Net.request({
           url: API.Postcomment(that.data.item.cid, app.Data.userInfo.openid, app.Data.userInfo.nickName, that.data.cmtext, that.data.replaycoid, app.Data.userInfo.avatarUrl, e.detail.formId),
           success: function(res) {

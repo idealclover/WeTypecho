@@ -63,9 +63,10 @@
     </block>
 <view class="comment-fixed">
     <view class="comment-respond">
+        <form bindsubmit="sendcm" report-submit='true'>
         <view class="comment-box">
             <input class="comment-input" type='text' bindinput="cminput" value="{{cmtext}}" placeholder="{{cmplaceholder}}" bindblur="cmloss" focus="{{focus}}" bindfocus="cmfocus" />
-            <button class="comment-button touch-active" formType="submit" bindtap = "sendcm">发送</button>
+            <button class="comment-button touch-active" formType="submit">发送</button>
             <view class="cmview" bindtap="zanstart">
                 <image src="{{zanimg}}" class="img-plus" mode="scaleToFill"></image>
                 <text class="cmicontext">{{item.likes}}赞</text>
@@ -84,6 +85,7 @@
                 <text class="cmicontext">分享</text>
             </view>
         </view>
+        </form>
     </view>
     </view>
 </view>

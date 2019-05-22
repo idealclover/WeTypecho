@@ -127,14 +127,10 @@ Page({
       url:API.Getuserlikedlist(cid),
       success: function(res) {
         var datas = res.data.data;
-        console.log("QAQ")
         if(datas != null && datas != undefined) {
-          console.log(datas.length)
-          console.log(that.data.item.likes)
           if(datas.length < that.data.item.likes)
           {
             var cnt = that.data.item.likes - datas.length;
-            console.log(cnt);
             for(var i=0; i< cnt; i++)
               {
                 var user = new likemember('网页用户','../../resources/zhihu.jpg')
@@ -293,7 +289,7 @@ Page({
     }
   },
 
-  sendcm: function() {
+  sendcm: function(e) {
     var that = this;
     that.setData({
       cmbtnclick: true
@@ -306,7 +302,7 @@ Page({
         }
         this.data.replyauthor = true;
         Net.request({
-          url: API.Postcomment(that.data.item.cid,app.Data.userInfo.nickName,that.data.cmtext,that.data.replaycoid,app.Data.userInfo.avatarUrl),
+          url: API.Postcomment(that.data.item.cid, app.Data.userInfo.openid, app.Data.userInfo.nickName, that.data.cmtext, that.data.replaycoid, app.Data.userInfo.avatarUrl, e.detail.formId),
           success: function(res) {
             that.getcomments(that.data.item.cid);
             that.setData ({
