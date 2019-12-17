@@ -570,9 +570,9 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $result = array();
         //获取根评论
         foreach ($comments as $comment) {
-            if($comment['authorImg'] == null){
-                $comment['authorImg'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower(trim($comment['mail']))) . '?d=https://idealclover.top/usr/themes/clover/assets/default.jpg'
-            }
+            // if($comment['authorImg'] == null){
+                // $comment['authorImg'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower(trim($comment['mail']))) . '?d=https://idealclover.top/usr/themes/clover/assets/default.jpg';
+            // }
             if($comment['parent'] == 0) {
                 $result[] = $comment;
             }
