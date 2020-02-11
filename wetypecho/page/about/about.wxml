@@ -1,4 +1,4 @@
-<import src="../../towxml/entry.wxml" />
+<import src="../../libs/towxml/entry.wxml" />
 <import src="../../template/foot.wxml" />
 <view class="minheight" >
     <image mode="widthFix" class="wx-image_movie_cover" src='{{item.thumb}}' />

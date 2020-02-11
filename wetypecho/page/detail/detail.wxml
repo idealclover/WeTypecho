@@ -1,4 +1,4 @@
-<import src="../../towxml/entry.wxml" />
+<import src="../../libs/towxml/entry.wxml" />
 <import src="../../template/foot.wxml" />
 
 <view class="minheight detail_info" style="min-height: 220rpx;" >
