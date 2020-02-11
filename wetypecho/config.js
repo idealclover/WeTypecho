@@ -1,3 +1,7 @@
+// var domain = "idealclover.cn"
+// var name = "idealclover"
+// var API_SECRET = "idealclover"
+
 var domain = "idealclover.cn"
 var name = "idealclover"
 var API_SECRET = "idealclover"
