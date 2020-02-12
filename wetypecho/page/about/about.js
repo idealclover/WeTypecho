@@ -2,13 +2,13 @@
    使用教程：www.2012.pro
    有任何使用问题请联系作者QQ 294351525
 */
-var API = require('../../utils/api');
-var Net = require('../../utils/net');
+var API = require("../../utils/api");
+var Net = require("../../utils/net");
 
 // 获取全局应用程序实例对象
 var app = getApp();
 
-function likemember(name,img) {
+function likemember(name, img) {
   this.nickname = name;
   this.avatarUrl = img;
 }
@@ -27,32 +27,36 @@ Page({
     item: [],
     vcomment: [],
     commentlist: [],
-    thispath: 'page/detail/detail',
+    thispath: "page/detail/detail",
     cid: 0,
-    hiddenmodalput:true,
-    replaycoid: '',
-    replaycontent: '',
-    zanimg: '../../resources/zanoff.png',
+    hiddenmodalput: true,
+    replaycoid: "",
+    replaycontent: "",
+    zanimg: "../../resources/zanoff.png",
     likelist: [],
-    createdtime: '1分钟前',
-    replytxt: '说点什么吧...',
-    cmplaceholder: '说点什么吧...',
+    createdtime: "1分钟前",
+    replytxt: "说点什么吧...",
+    cmplaceholder: "说点什么吧...",
     focus: false,
-    cmtext: '',
+    cmtext: "",
     replyauthor: true,
-    qrcode_temp: '',
+    qrcode_temp: "",
     painting: {},
     cmbtnclick: false,
-    aboutstr: '\u7434\u5fc3\u5251\u9b44\u4eca\u4f55\u5728\uff0c\u6c38\u591c\u521d'
+    aboutstr:
+      "\u7434\u5fc3\u5251\u9b44\u4eca\u4f55\u5728\uff0c\u6c38\u591c\u521d"
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad (options) {
+  onLoad(options) {
     this.setData({
-      aboutstr: '\u0050\u006f\u0077\u0065\u0072\u0065\u0064\u0020\u0062\u0079\u0020\u0057\u0065\u0054\u0079\u0070\u0065\u0063\u0068\u006f'.replace(/\\u/g, '%u')
-    })
+      aboutstr: "\u0050\u006f\u0077\u0065\u0072\u0065\u0064\u0020\u0062\u0079\u0020\u0057\u0065\u0054\u0079\u0070\u0065\u0063\u0068\u006f".replace(
+        /\\u/g,
+        "%u"
+      )
+    });
     this.getabout();
   },
   getabout() {
@@ -61,37 +65,36 @@ Page({
       url: API.GetAboutCid(),
       success: function(res) {
         var datas = res.data.data;
-        if(API.IsNull(datas)) {
-          if(datas != 'none') {
+        if (API.IsNull(datas)) {
+          if (datas != "none") {
             that.data.cid = datas;
             that.getdetails(that.data.cid);
-            }
+          }
         }
       }
-    })
+    });
   },
-  __bind_tap (event) {
+  __bind_tap(event) {
     var href = event.target.dataset._el.attr.href;
-    if(API.IsNull(href)) {
-      var cidaddr = href.search('cid=');
-      if( -1 != href.search(API.GetDomain()) && -1 != cidaddr ) {
-
-          var end = href.search('.html');
-          var cid = href.substring(cidaddr+4,end);
-          wx.navigateTo({
-            url: '../detail/detail?item=' + cid,
-          })
+    if (API.IsNull(href)) {
+      var cidaddr = href.search("cid=");
+      if (-1 != href.search(API.GetDomain()) && -1 != cidaddr) {
+        var end = href.search(".html");
+        var cid = href.substring(cidaddr + 4, end);
+        wx.navigateTo({
+          url: "../detail/detail?item=" + cid
+        });
       } else {
-      wx.setClipboardData({
+        wx.setClipboardData({
           data: href,
           success() {
             wx.hideToast();
             wx.showToast({
-              title: '链接已复制',
+              title: "链接已复制",
               duration: 2000
-            })
+            });
           }
-        })
+        });
       }
     }
   },
@@ -102,19 +105,19 @@ Page({
       success: function(res) {
         var datas = res.data.data;
         var parsed_item = API.ParseItem(datas[0]);
-        var data = parsed_item.text.replace(/!!!/g,"");
-        let data_parse = app.towxml.toJson(data,'markdown');
+        var data = parsed_item.text.replace(/!!!/g, "");
+        let data_parse = app.towxml.toJson(data, "markdown");
         that.setData({
           content: data_parse,
           item: parsed_item
-        })
+        });
         //发布时间
         that.data.createdtime = API.getcreatedtime(parsed_item.created);
         that.setData({
           createdtime: that.data.createdtime
-        })
+        });
       }
-    })
+    });
     //获取文章评论
     this.getcomments(cid);
     //获取点赞列表
@@ -124,45 +127,48 @@ Page({
   getlikelist(cid) {
     var that = this;
     Net.request({
-      url:API.Getuserlikedlist(cid),
+      url: API.Getuserlikedlist(cid),
       success: function(res) {
         var datas = res.data.data;
-        if(datas != null && datas != undefined) {
-          if(datas.length < that.data.item.likes)
-          {
+        if (datas != null && datas != undefined) {
+          if (datas.length < that.data.item.likes) {
             var cnt = that.data.item.likes - datas.length;
-            for(var i=0; i< cnt; i++)
-              {
-                var user = new likemember('网页用户','../../resources/zhihu.jpg')
-                datas.push(user);
-              }
+            for (var i = 0; i < cnt; i++) {
+              var user = new likemember(
+                "网页用户",
+                "../../resources/zhihu.jpg"
+              );
+              datas.push(user);
+            }
           }
           that.setData({
-            likelist: datas.map(function (item){
+            likelist: datas.map(function(item) {
               return item;
             })
-          })
+          });
         } else {
-          if( that.data.item.likes > 0 ) {
+          if (that.data.item.likes > 0) {
             var m_datas = [];
-            for(var i=0; i< that.data.item.likes; i++)
-              {
-                var user = new likemember('网页用户','../../resources/zhihu.jpg')
-                m_datas.push(user);
-              }
-              that.setData({
-                likelist: m_datas.map(function(item) {
-                  return item;
-                })
+            for (var i = 0; i < that.data.item.likes; i++) {
+              var user = new likemember(
+                "网页用户",
+                "../../resources/zhihu.jpg"
+              );
+              m_datas.push(user);
+            }
+            that.setData({
+              likelist: m_datas.map(function(item) {
+                return item;
               })
+            });
           } else {
             that.setData({
               likelist: []
-            })
+            });
           }
         }
       }
-    })
+    });
   },
   getcomments(cid) {
     var that = this;
@@ -171,120 +177,105 @@ Page({
       success: function(res) {
         var comments = res.data.data;
         that.setData({
-          commentlist: comments.map(function (item){
-            if(item.author == null || item.author == 'undefined')
-              {
-                item.author = '游客';
-              }
-            if(item.authorImg == null || item.authorImg == 'undefined')
-              {
-                item.authorImg = 'http://secure.gravatar.com/avatar/';
-              }
+          commentlist: comments.map(function(item) {
+            if (item.author == null || item.author == "undefined") {
+              item.author = "游客";
+            }
+            if (item.authorImg == null || item.authorImg == "undefined") {
+              item.authorImg = "http://secure.gravatar.com/avatar/";
+            }
             item.comcreatedtime = API.getcreatedtime(item.created);
             return item;
           })
-        })
+        });
       }
-    })
+    });
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
-  onReady () {
-
-  },
+  onReady() {},
 
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow () {
+  onShow() {
     var that = this;
-    if( API.loginsuccess(app)) {
+    if (API.loginsuccess(app)) {
       Net.request({
-        url: API.Getuserlikedinfo(that.data.cid,app.Data.userInfo.openid),
+        url: API.Getuserlikedinfo(that.data.cid, app.Data.userInfo.openid),
         success: function(res) {
           var datas = res.data.data;
-          if(datas=='false') {
+          if (datas == "false") {
             that.setData({
-              zanimg: '../../resources/zanoff.png'
-            })
-          }
-          else {
+              zanimg: "../../resources/zanoff.png"
+            });
+          } else {
             that.setData({
-              zanimg: '../../resources/zanon.png'
-            })
+              zanimg: "../../resources/zanon.png"
+            });
           }
         }
-      })
+      });
     }
   },
 
   /**
    * 生命周期函数--监听页面隐藏
    */
-  onHide () {
-
-  },
+  onHide() {},
 
   /**
    * 生命周期函数--监听页面卸载
    */
-  onUnload () {
-
-  },
+  onUnload() {},
 
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
-  onPullDownRefresh () {
+  onPullDownRefresh() {
     wx.stopPullDownRefresh();
     this.getdetails(this.data.cid);
   },
-  zanstart: function()
-  {
+  zanstart: function() {
     var that = this;
-    if( API.loginsuccess(app)) {
+    if (API.loginsuccess(app)) {
       Net.request({
-        url: API.PostLike(that.data.item.cid,app.Data.userInfo.openid),
+        url: API.PostLike(that.data.item.cid, app.Data.userInfo.openid),
         success: function(res) {
           var datas = res.data.data;
           var status = datas.status;
           that.data.item.likes = datas[0].likes;
           that.setData({
             item: that.data.item
-          })
-          if(status=='like') {
+          });
+          if (status == "like") {
             that.setData({
-              zanimg: '../../resources/zanon.png'
-            })
-          }
-          else {
+              zanimg: "../../resources/zanon.png"
+            });
+          } else {
             that.setData({
-              zanimg: '../../resources/zanoff.png'
-            })
+              zanimg: "../../resources/zanoff.png"
+            });
           }
           that.getlikelist(that.data.cid);
         }
-      })
-    }
-    else
-    {
+      });
+    } else {
       API.ConfirmAuth();
     }
   },
-  replayto:function(e){
-    if( API.loginsuccess(app)) {
+  replayto: function(e) {
+    if (API.loginsuccess(app)) {
       var to = e.target.dataset.author;
       this.data.replaycoid = e.target.dataset.authorid;
       this.setData({
         to: to,
         focus: true,
-        cmplaceholder: '回复 ' + to + ":",
+        cmplaceholder: "回复 " + to + ":",
         replyauthor: false
-      })
-    }
-    else
-    {
+      });
+    } else {
       API.ConfirmAuth();
     }
   },
@@ -294,94 +285,110 @@ Page({
     that.setData({
       cmbtnclick: true
     });
-    if(this.data.cmtext != '' && this.data.cmtext != undefined && this.data.cmtext != null)
-    {
-      if( API.loginsuccess(app)) {
-        if(this.data.replyauthor) {
+    if (
+      this.data.cmtext != "" &&
+      this.data.cmtext != undefined &&
+      this.data.cmtext != null
+    ) {
+      if (API.loginsuccess(app)) {
+        if (this.data.replyauthor) {
           this.data.replaycoid = 0;
         }
         this.data.replyauthor = true;
         Net.request({
-          url: API.Postcomment(that.data.item.cid, app.Data.userInfo.openid, app.Data.userInfo.nickName, that.data.cmtext, that.data.replaycoid, app.Data.userInfo.avatarUrl, e.detail.formId),
+          url: API.Postcomment(
+            that.data.item.cid,
+            app.Data.userInfo.openid,
+            app.Data.userInfo.nickName,
+            that.data.cmtext,
+            that.data.replaycoid,
+            app.Data.userInfo.avatarUrl,
+            e.detail.formId
+          ),
           success: function(res) {
             that.getcomments(that.data.item.cid);
-            that.setData ({
-              cmtext: '',
-              cmplaceholder: '说点什么吧...'
-            })
+            that.setData({
+              cmtext: "",
+              cmplaceholder: "说点什么吧..."
+            });
           }
-        })
-      }
-      else
-      {
+        });
+      } else {
         API.ConfirmAuth();
       }
-    }
-    else
-    {
+    } else {
       wx.showToast({
-        title: '请输入回复文字',
-        icon: 'none',
+        title: "请输入回复文字",
+        icon: "none",
         duration: 2000
-      })
+      });
     }
   },
-  cmfocus: function (e) {
+  cmfocus: function(e) {
     var that = this;
     if (!that.data.focus) {
       that.setData({
-          focus: true
-      })
+        focus: true
+      });
     }
   },
   cminput: function(e) {
     this.setData({
       cmtext: e.detail.value.trim()
-    })
+    });
   },
   replaycontent: function(e) {
     this.setData({
       replaycontent: e.detail.value
-    })
+    });
   },
   share: function() {
     var that = this;
-    if( API.loginsuccess(app)) {
+    if (API.loginsuccess(app)) {
       wx.navigateTo({
-        url: '../share/share?nickName=' + app.Data.userInfo.nickName + "&thumb=" + that.data.item.thumb + "&title=" + that.data.item.title + "&path=" + that.data.thispath + "&cid=" + that.data.cid,
-      })
-    } else{
+        url:
+          "../share/share?nickName=" +
+          app.Data.userInfo.nickName +
+          "&thumb=" +
+          that.data.item.thumb +
+          "&title=" +
+          that.data.item.title +
+          "&path=" +
+          that.data.thispath +
+          "&cid=" +
+          that.data.cid
+      });
+    } else {
       API.ConfirmAuth();
     }
   },
-  eventGetImage (event) {
-    wx.hideLoading()
-    const { tempFilePath, errMsg } = event.detail
-    if (errMsg === 'canvasdrawer:ok') {
+  eventGetImage(event) {
+    wx.hideLoading();
+    const { tempFilePath, errMsg } = event.detail;
+    if (errMsg === "canvasdrawer:ok") {
       this.setData({
         shareImage: tempFilePath
-      })
+      });
     }
   },
-  onShareAppMessage: function (ops) {
-    if (ops.from === 'button') {
+  onShareAppMessage: function(ops) {
+    if (ops.from === "button") {
       // 来自页面内转发按钮
     }
     return {
       title: this.data.item.title,
       path: this.data.item.thispath,
-      success: function (res) {
+      success: function(res) {
         // 转发成功
       },
-      fail: function (res) {
+      fail: function(res) {
         // 转发失败
-
       }
-    }
+    };
   },
   cmloss: function() {
     this.setData({
-      cmplaceholder: '说点什么吧...',
-    })
+      cmplaceholder: "说点什么吧..."
+    });
   }
-})
+});

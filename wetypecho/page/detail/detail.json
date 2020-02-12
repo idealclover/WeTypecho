@@ -1,6 +1,6 @@
 {
-    "enablePullDownRefresh": true,
-    "usingComponents": {
-        "canvasdrawer": "../../libs/canvasdrawer/canvasdrawer"
-      }
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "canvasdrawer": "../../libs/canvasdrawer/canvasdrawer"
+  }
 }

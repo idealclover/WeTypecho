@@ -35,7 +35,7 @@ page{
     padding-right: 30rpx;
 }
 .row-wrap .right-box{
-    margin-right: 30rpx; 
+    margin-right: 30rpx;
 }
 .arrow-right{
     width: 15rpx;
@@ -47,7 +47,7 @@ page{
     height: 80rpx;
     line-height: 80rpx;
     text-align: center;
-    margin-top:30rpx; 
+    margin-top:30rpx;
     border-radius: 6rpx;
     box-sizing: border-box;
 }
