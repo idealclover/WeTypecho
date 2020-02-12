@@ -39,36 +39,36 @@ toast(title, onHide, icon = "success") {
     }
 },
 
-/**
- * 警告框
- */
-alert(title) {
-    wx.showToast({
-    title: title,
-    image: "../images/alert.png",
-    mask: true,
-    duration: 1500
-    });
-},
+// /**
+//  * 警告框
+//  */
+// alert(title) {
+//     wx.showToast({
+//     title: title,
+//     image: "../images/alert.png",
+//     mask: true,
+//     duration: 1500
+//     });
+// },
 
-/**
- * 错误框
- */
+// /**
+//  * 错误框
+//  */
 
-error(title, onHide) {
-    wx.showToast({
-    title: title,
-    image: "../images/error.png",
-    mask: true,
-    duration: 500
-    });
-    // 隐藏结束回调
-    if (onHide) {
-    setTimeout(() => {
-        onHide();
-    }, 500);
-    }
-},
+// error(title, onHide) {
+//     wx.showToast({
+//     title: title,
+//     image: "../images/error.png",
+//     mask: true,
+//     duration: 500
+//     });
+//     // 隐藏结束回调
+//     if (onHide) {
+//     setTimeout(() => {
+//         onHide();
+//     }, 500);
+//     }
+// },
 
 loading(title = "加载中") {
     if (isLoading) {
@@ -94,7 +94,7 @@ loadfailed(str) {
     wx.hideLoading();
     wx.showToast({
         title: str,
-        image: '../../resources/error.png',
+        image: '../resources/error.png',
         mask: true,
         duration: 2000
     });
