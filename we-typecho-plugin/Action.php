@@ -1,16 +1,20 @@
 <?php
 header('Access-Control-Allow-Origin: *');
-class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
+class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do
+{
     private $db;
     private $res;
     const LACK_PARAMETER = 'Not found';
-    public function __construct($request, $response, $params = NULL) {
+    public function __construct($request, $response, $params = NULL)
+    {
         parent::__construct($request, $response, $params);
         $this->db  = Typecho_Db::get();
         $this->res = new Typecho_Response();
         $this->apisecret = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->apiSecret;
         $this->appid = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->appid;
         $this->appsecret = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->appsecret;
+        $this->qqAppid = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->qqAppid;
+        $this->qqAppsecret = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->qqAppsecret;
         $swipe = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->swipePosts;
         if (method_exists($this, $this->request->type)) {
             call_user_func(array(
@@ -21,17 +25,19 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
             $this->defaults();
         }
     }
-    private function defaults() {
+    private function defaults()
+    {
         $this->export(NULL);
     }
     private function checkApisec($sec)
     {
-        if(strcmp($sec,$this->apisecret) != 0) {
+        if (strcmp($sec, $this->apisecret) != 0) {
             $this->export('API secret error');
-            }
+        }
     }
 
-    private function posts() {
+    private function posts()
+    {
         $sec = self::GET('apisec', 'null');
         self::checkApisec($sec);
         $pageSize = (int) self::GET('pageSize', 1000);
@@ -39,25 +45,23 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $authorId = self::GET('authorId', 0);
         $offset   = $pageSize * ($page - 1);
         $getpage = self::GET('getpage', 0);
-        $idx     = self::GET('idx',-1);
+        $idx     = self::GET('idx', -1);
 
         // 根据cid偏移获取文章
         if (isset($_GET['cid'])) {
             $cid = self::GET('cid');
-            if($getpage) {
-                $select = $this->db->select('cid', 'title', 'created', 'type', 'slug', 'text','commentsNum')->from('table.contents')->where('type = ?', 'page')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->offset($offset)->limit($pageSize);
+            if ($getpage) {
+                $select = $this->db->select('cid', 'title', 'created', 'type', 'slug', 'text', 'commentsNum')->from('table.contents')->where('type = ?', 'page')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->offset($offset)->limit($pageSize);
             } else {
-                $select = $this->db->select('cid', 'title', 'created', 'type', 'slug', 'text','commentsNum')->from('table.contents')->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->offset($offset)->limit($pageSize);
+                $select = $this->db->select('cid', 'title', 'created', 'type', 'slug', 'text', 'commentsNum')->from('table.contents')->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->offset($offset)->limit($pageSize);
             }
-             $select->where('cid = ?', $cid);
+            $select->where('cid = ?', $cid);
             //更新点击量数据库
             $row = $this->db->fetchRow($this->db->select('views')->from('table.contents')->where('cid = ?', $cid));
-            $this->db->query($this->db->update('table.contents')->rows(array('views' => (int)$row['views']+1))->where('cid = ?', $cid));
-        }
-        else
-        {
+            $this->db->query($this->db->update('table.contents')->rows(array('views' => (int) $row['views'] + 1))->where('cid = ?', $cid));
+        } else {
             //如果不指定具体文章CID，不抓取text
-            $select   = $this->db->select('cid', 'title', 'created', 'type', 'slug','commentsNum')->from('table.contents')->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->offset($offset)->limit($pageSize);
+            $select   = $this->db->select('cid', 'title', 'created', 'type', 'slug', 'commentsNum')->from('table.contents')->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->offset($offset)->limit($pageSize);
         }
         // 根据分类或标签获取文章
         if (isset($_GET['category']) || isset($_GET['tag'])) {
@@ -69,9 +73,8 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
             }
             $select->where('cid IN ?', $cids);
         }
-        if($idx>=0){
-            switch($idx)
-            {
+        if ($idx >= 0) {
+            switch ($idx) {
                 case 0:
                     //浏览量
                     $select->order('table.contents.views', Typecho_Db::SORT_DESC);
@@ -94,7 +97,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         foreach ($posts as $post) {
             $post        = $this->widget("Widget_Abstract_Contents")->push($post);
             $post['tag'] = $this->db->fetchAll($this->db->select('name')->from('table.metas')->join('table.relationships', 'table.metas.mid = table.relationships.mid', Typecho_DB::LEFT_JOIN)->where('table.relationships.cid = ?', $post['cid'])->where('table.metas.type = ?', 'tag'));
-            $post['thumb'] = $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $post['cid']))?$this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $post['cid'])):array(array("str_value"=>"https://api.isoyu.com/bing_images.php"));
+            $post['thumb'] = $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $post['cid'])) ? $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $post['cid'])) : array(array("str_value" => "https://api.isoyu.com/bing_images.php"));
             $post['views'] = $this->db->fetchAll($this->db->select('views')->from('table.contents')->where('table.contents.cid = ?', $post['cid']));
             $post['likes'] = $this->db->fetchAll($this->db->select('likes')->from('table.contents')->where('table.contents.cid = ?', $post['cid']));
             $post['showshare'] = $temp;
@@ -117,7 +120,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
 
         $openid = self::GET('openid', 'null');
         $oid = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->monitorOid;
-        if($openid == $oid)
+        if ($openid == $oid)
             $this->export('true');
         else
             $this->export('false');
@@ -130,27 +133,28 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $sec = self::GET('apisec', 'null');
         self::checkApisec($sec);
         $temp = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->hiddenmid;
-        $select = $this->db->select('name','slug','type','description','mid')->from('table.metas')->where('table.metas.type = ?','category')->order('mid',Typecho_Db::SORT_DESC);
-        $hiddenmids = explode(",",$temp);
+        $select = $this->db->select('name', 'slug', 'type', 'description', 'mid')->from('table.metas')->where('table.metas.type = ?', 'category')->order('mid', Typecho_Db::SORT_DESC);
+        $hiddenmids = explode(",", $temp);
         $hidden = false;
-        if(sizeof($hiddenmids)>0 && intval($hiddenmids[0])) {
-        $select->where('mid in ?', $hiddenmids);
-        $hidden = true;
+        if (sizeof($hiddenmids) > 0 && intval($hiddenmids[0])) {
+            $select->where('mid in ?', $hiddenmids);
+            $hidden = true;
         }
 
         $cat = $this->db->fetchAll($select);
-        if(!$hidden) {
-        $cat_recent = $cat[0];
-        $cat_recent['name'] = "最近发布";
-        $cat_recent['slug'] = "最近发布";
-        $cat_recent['mid'] = "99999999";
-        array_unshift($cat,$cat_recent);
+        if (!$hidden) {
+            $cat_recent = $cat[0];
+            $cat_recent['name'] = "最近发布";
+            $cat_recent['slug'] = "最近发布";
+            $cat_recent['mid'] = "99999999";
+            array_unshift($cat, $cat_recent);
         }
         $this->export($cat);
     }
 
     //首页参数 pageSize
-    private function recentPost() {
+    private function recentPost()
+    {
         $sec = self::GET('apisec', 'null');
         self::checkApisec($sec);
         $pageSize = self::GET('pageSize', 10);
@@ -173,14 +177,13 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $like = self::GET('like', -1);
         $openid = self::GET('openid', 'null');
         $row = $this->db->fetchRow($this->db->select('likes')->from('table.contents')->where('cid = ?', $cid));
-        if(self::checkliked($openid,$cid)) {
+        if (self::checkliked($openid, $cid)) {
             //已点赞-1
-            $this->db->query($this->db->update('table.contents')->rows(array('likes' => (int)$row['likes']-1))->where('cid = ?', $cid));
+            $this->db->query($this->db->update('table.contents')->rows(array('likes' => (int) $row['likes'] - 1))->where('cid = ?', $cid));
             $this->db->query($this->db->delete('table.wetypecholike')->rows(array('openid' => $openid, 'cid' => $cid))->where('openid =?', $openid)->where('cid =?', $cid));
             $status = 'dislike';
-        }
-        else {
-            $this->db->query($this->db->update('table.contents')->rows(array('likes' => (int)$row['likes']+1))->where('cid = ?', $cid));
+        } else {
+            $this->db->query($this->db->update('table.contents')->rows(array('likes' => (int) $row['likes'] + 1))->where('cid = ?', $cid));
             //更新赞数据库
             $this->db->query($this->db->insert('table.wetypecholike')->rows(array('openid' => $openid, 'cid' => $cid)));
             $status = 'like';
@@ -193,38 +196,33 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
     {
         $openid = self::GET('openid', 'null');
         $cid = self::GET('cid', 'null');
-        $row = $this->db->fetchRow($this->db->select('openid','cid')->from('table.wetypecholike')->where('cid = ?', $cid)->where('openid = ?', $openid));
-        if(self::checkliked($openid,$cid))
-        {
+        $row = $this->db->fetchRow($this->db->select('openid', 'cid')->from('table.wetypecholike')->where('cid = ?', $cid)->where('openid = ?', $openid));
+        if (self::checkliked($openid, $cid)) {
             //已存在该用户点赞
             $this->export('true');
-        }
-        else
-        {
+        } else {
             $this->export('false');
         }
     }
     private function getuserlikedlist()
     {
         $cid = self::GET('cid', 'null');
-        if($cid != 'null')
-        {
+        if ($cid != 'null') {
             $openids = $this->db->fetchAll($this->db->select('openid')->from('table.wetypecholike')->where('cid = ?', $cid));
-            foreach($openids as $openid) {
-                $temp = $this->db->fetchAll($this->db->select('nickname','avatarUrl')->from('table.wetypecho')->where('openid = ?', $openid));
-                if(sizeof($temp)>0) {
+            foreach ($openids as $openid) {
+                $temp = $this->db->fetchAll($this->db->select('nickname', 'avatarUrl')->from('table.wetypecho')->where('openid = ?', $openid));
+                if (sizeof($temp) > 0) {
                     $likeinfo[] = $temp[0];
                 }
             }
             $this->export($likeinfo);
-        }
-        else
-        {
+        } else {
             $this->export("No one like");
         }
     }
 
-    private function get_stat() {
+    private function get_stat()
+    {
         $sec = self::GET('apisec', 'null');
         self::checkApisec($sec);
 
@@ -236,31 +234,31 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         preg_match_all("/Buffers\s{0,}\:+\s{0,}([\d\.]+)/s", $str, $buffers);
 
 
-        $res['memTotal'] = round($buf[1][0]/1024, 2);
+        $res['memTotal'] = round($buf[1][0] / 1024, 2);
 
-        $res['memFree'] = round($buf[2][0]/1024, 2);
+        $res['memFree'] = round($buf[2][0] / 1024, 2);
 
-        $res['memBuffers'] = round($buffers[1][0]/1024, 2);
-        $res['memCached'] = round($buf[3][0]/1024, 2);
+        $res['memBuffers'] = round($buffers[1][0] / 1024, 2);
+        $res['memCached'] = round($buf[3][0] / 1024, 2);
 
-        $res['memUsed'] = $res['memTotal']-$res['memFree'];
+        $res['memUsed'] = $res['memTotal'] - $res['memFree'];
 
-        $res['memPercent'] = (floatval($res['memTotal'])!=0)?round($res['memUsed']/$res['memTotal']*100,2):0;
+        $res['memPercent'] = (floatval($res['memTotal']) != 0) ? round($res['memUsed'] / $res['memTotal'] * 100, 2) : 0;
 
 
         $res['memRealUsed'] = $res['memTotal'] - $res['memFree'] - $res['memCached'] - $res['memBuffers']; //真实内存使用
         $res['memRealFree'] = $res['memTotal'] - $res['memRealUsed']; //真实空闲
-        $res['memRealPercent'] = (floatval($res['memTotal'])!=0)?round($res['memRealUsed']/$res['memTotal']*100,2):0; //真实内存使用率
+        $res['memRealPercent'] = (floatval($res['memTotal']) != 0) ? round($res['memRealUsed'] / $res['memTotal'] * 100, 2) : 0; //真实内存使用率
 
-        $res['memCachedPercent'] = (floatval($res['memCached'])!=0)?round($res['memCached']/$res['memTotal']*100,2):0; //Cached内存使用率
+        $res['memCachedPercent'] = (floatval($res['memCached']) != 0) ? round($res['memCached'] / $res['memTotal'] * 100, 2) : 0; //Cached内存使用率
 
-        $res['swapTotal'] = round($buf[4][0]/1024, 2);
+        $res['swapTotal'] = round($buf[4][0] / 1024, 2);
 
-        $res['swapFree'] = round($buf[5][0]/1024, 2);
+        $res['swapFree'] = round($buf[5][0] / 1024, 2);
 
-        $res['swapUsed'] = round($res['swapTotal']-$res['swapFree'], 2);
+        $res['swapUsed'] = round($res['swapTotal'] - $res['swapFree'], 2);
 
-        $res['swapPercent'] = (floatval($res['swapTotal'])!=0)?round($res['swapUsed']/$res['swapTotal']*100,2):0;
+        $res['swapPercent'] = (floatval($res['swapTotal']) != 0) ? round($res['swapUsed'] / $res['swapTotal'] * 100, 2) : 0;
         if (false == ($str = @file("/proc/loadavg"))) return false;
 
         $str = explode(" ", implode("", $str));
@@ -269,18 +267,17 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
 
         $res['loadAvg'] = implode(" ", $str[0]);
         //磁盘
-        $res['DiskTotal'] = round(@disk_total_space(".")/(1024*1024*1024),3); //总
-        $res['DiskFree'] = round(@disk_free_space(".")/(1024*1024*1024),3); //可用
+        $res['DiskTotal'] = round(@disk_total_space(".") / (1024 * 1024 * 1024), 3); //总
+        $res['DiskFree'] = round(@disk_free_space(".") / (1024 * 1024 * 1024), 3); //可用
 
         //网卡
         $strs = @file("/proc/net/dev");
 
-        for ($i = 2; $i < count($strs); $i++ )
-        {
-            preg_match_all( "/([^\s]+):[\s]{0,}(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/", $strs[$i], $info );
-            if($info[1][0] == 'eth0') {
-            $res['NetOut'] = $info[10][0];
-            $res['NetInput'] = $info[2][0];
+        for ($i = 2; $i < count($strs); $i++) {
+            preg_match_all("/([^\s]+):[\s]{0,}(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/", $strs[$i], $info);
+            if ($info[1][0] == 'eth0') {
+                $res['NetOut'] = $info[10][0];
+                $res['NetInput'] = $info[2][0];
             }
         }
         //CPU
@@ -296,18 +293,17 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
 
         @preg_match_all("/bogomips\s{0,}\:+\s{0,}([\d\.]+)[\r\n]+/", $str, $bogomips);
 
-        if (false !== is_array($model[1]))
-        {
+        if (false !== is_array($model[1])) {
 
             $res['cpu']['num'] = sizeof($model[1]);
-            if($res['cpu']['num']==1)
+            if ($res['cpu']['num'] == 1)
                 $x1 = '';
             else
-                $x1 = ' ×'.$res['cpu']['num'];
+                $x1 = ' ×' . $res['cpu']['num'];
             $mhz[1][0] = $mhz[1][0];
             $cache[1][0] = $cache[1][0];
             $bogomips[1][0] = $bogomips[1][0];
-            $res['cpu']['model'] = $model[1][0].$mhz[1][0].$cache[1][0].$bogomips[1][0].$x1;
+            $res['cpu']['model'] = $model[1][0] . $mhz[1][0] . $cache[1][0] . $bogomips[1][0] . $x1;
             $res['cpu']['mhz'] = $mhz[1][0];
             $res['cpu']['cache'] = $cache[1][0];
             $res['cpu']['bogomips'] = $bogomips[1][0];
@@ -321,15 +317,15 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         self::checkApisec($sec);
 
         $path = self::GET('path', 'null');
-        if($path == 'null') {
+        if ($path == 'null') {
             $path = 'page/index/index';
         }
-        $url = sprintf('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s',$this->appid,$this->appsecret);
+        $url = sprintf('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s', $this->appid, $this->appsecret);
         $info = file_get_contents($url);
         $json = json_decode($info);
         $arr = get_object_vars($json);
         $accesscode = $arr['access_token'];
-        $url_1 = sprintf('https://api.weixin.qq.com/wxa/getwxacode?access_token=%s',$accesscode);
+        $url_1 = sprintf('https://api.weixin.qq.com/wxa/getwxacode?access_token=%s', $accesscode);
         //$qrurl = $arr_t['access_token'];
         $post_data = array(
             'path' => $path
@@ -337,33 +333,38 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $jsonStr = json_encode($post_data);
         $qrcode = $this->http_post_data($url_1, $jsonStr);
         $filename = 'qrcode.png';
-        $write_fd = @fopen($filename,'w+');
-        if( fwrite($write_fd, $qrcode) ) {
+        $write_fd = @fopen($filename, 'w+');
+        if (fwrite($write_fd, $qrcode)) {
             fclose($write_fd);
             $this->export($filename);
         }
         $this->export("error");
     }
 
-    function http_post_data($url, $data_string) {
+    function http_post_data($url, $data_string)
+    {
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json; charset=utf-8',
-            'Content-Length: ' . strlen($data_string))
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            array(
+                'Content-Type: application/json; charset=utf-8',
+                'Content-Length: ' . strlen($data_string)
+            )
         );
         ob_start();
         curl_exec($ch);
         $return_content = ob_get_contents();
-		//echo $return_content."<br>";
+        //echo $return_content."<br>";
         ob_end_clean();
 
         $return_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-      //  return array($return_code, $return_content);
-	  return  $return_content;
+        //  return array($return_code, $return_content);
+        return  $return_content;
     }
     private function login()
     {
@@ -371,39 +372,39 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         self::checkApisec($sec);
 
         $code = self::GET('code', 'null');
-        if($code != 'null')
-        {
+        $mp = self::GET('mp', 'weixin');
+        if ($code != 'null') {
             $nickname = self::GET('nickname', 'null');
             $avatarUrl = self::GET('avatarUrl', 'null');
             $city = self::GET('city', 'null');
             $country = self::GET('country', 'null');
             $gender = self::GET('gender', 'null');
             $province = self::GET('province', 'null');
-            $url = sprintf('https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code',$this->appid,$this->appsecret,$code);
+            if($mp == 'weixin') $url = sprintf('https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code', $this->appid, $this->appsecret, $code);
+            else if($mp == 'qq') $url = sprintf('https://api.q.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code', $this->qqAppid, $this->qqAppsecret, $code);
             $info = file_get_contents($url);
-            $json = json_decode($info);//对json数据解码
+            $json = json_decode($info); //对json数据解码
             $arr = get_object_vars($json);
             $openid = $arr['openid'];
-            if( $openid != null && $openid != '' ) {
-                $row = $this->db->fetchRow($this->db->select('openid','lastlogin')->from('table.wetypecho')->where('openid = ?', $openid));
+            if ($openid != null && $openid != '') {
+                $row = $this->db->fetchRow($this->db->select('openid', 'lastlogin')->from('table.wetypecho')->where('openid = ?', $openid));
                 //已存在的用户,更新上次登录时间
-                if(sizeof($row)>0) {
+                if (sizeof($row) > 0) {
                     $this->db->query($this->db->update('table.wetypecho')->rows(array('lastlogin' => time()))->where('openid = ?', $openid));
                     $this->export($openid);
-                }
-                else {
+                } else {
                     //新用户
-                    $this->db->query($this->db->insert('table.wetypecho')->rows(array('openid' => $openid, 'createtime' => time(), 'lastlogin' => time(),
+                    $this->db->query($this->db->insert('table.wetypecho')->rows(array(
+                        'openid' => $openid, 'createtime' => time(), 'lastlogin' => time(),
                         'nickname' => $nickname, 'avatarUrl' => $avatarUrl, 'city' => $city, 'country' => $country,
-                        'gender' => $gender, 'province' => $province)));
+                        'gender' => $gender, 'province' => $province
+                    )));
                     $this->export($openid);
                 }
             } else {
                 $this->export('none');
             }
-        }
-        else
-        {
+        } else {
             $this->export("error code");
         }
     }
@@ -419,28 +420,27 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $formid = self::GET('formid', "NULL");
         $openid = self::GET('openid', "NULL");
 
-        $coid =$this->db->query($this->db->insert('table.comments')->rows(array('cid' => $cid, 'created' => time(), 'author' => $author, 'authorId' => '0',
-                'ownerId' => '1', 'mail' => $openid.'@wx.com', 'url' => 'NULL', 'ip' =>'8.8.8.8', 'agent' => 'wx-miniprogram', 'text' => $text, 'type' => 'comment',
-                'status' => 'approved', 'parent' => $parent,
-                'authorImg' => $headicon )));
-        if($coid>0) {
+        $coid = $this->db->query($this->db->insert('table.comments')->rows(array(
+            'cid' => $cid, 'created' => time(), 'author' => $author, 'authorId' => '0',
+            'ownerId' => '1', 'mail' => $openid . '@wx.com', 'url' => 'NULL', 'ip' => '8.8.8.8', 'agent' => 'wx-miniprogram', 'text' => $text, 'type' => 'comment',
+            'status' => 'approved', 'parent' => $parent,
+            'authorImg' => $headicon
+        )));
+        if ($coid > 0) {
             $row = $this->db->fetchRow($this->db->select('commentsNum')->from('table.contents')->where('cid = ?', $cid));
-            $this->db->query($this->db->update('table.contents')->rows(array('commentsNum' => (int)$row['commentsNum']+1))->where('cid = ?', $cid));
-            $this->db->query($this->db->update('table.wetypecho')->rows(array('formid' => $formid ))->where('openid = ?', $openid));
+            $this->db->query($this->db->update('table.contents')->rows(array('commentsNum' => (int) $row['commentsNum'] + 1))->where('cid = ?', $cid));
+            $this->db->query($this->db->update('table.wetypecho')->rows(array('formid' => $formid))->where('openid = ?', $openid));
         }
         $this->export($coid);
     }
 
-    private function checkliked($openid,$cid)
+    private function checkliked($openid, $cid)
     {
-        $row = $this->db->fetchRow($this->db->select('openid','cid')->from('table.wetypecholike')->where('cid = ?', $cid)->where('openid = ?', $openid));
-        if(sizeof($row)>0)
-        {
+        $row = $this->db->fetchRow($this->db->select('openid', 'cid')->from('table.wetypecholike')->where('cid = ?', $cid)->where('openid = ?', $openid));
+        if (sizeof($row) > 0) {
             //已存在该用户点赞
             return 1;
-        }
-        else
-        {
+        } else {
             return 0;
         }
     }
@@ -453,45 +453,43 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $except = (int) self::GET('except', 'null');
         $mid = self::GET('mid', -1);
         $select = [];
-        if($mid == 99999999) {
-            $posts = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'type', 'slug','commentsNum')->from('table.contents')->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->limit(10));
-            foreach($posts as $post) {
-                $temp = $this->db->fetchAll($this->db->select('cid', 'title', 'created','commentsNum', 'views', 'likes')->from('table.contents')->where('cid = ?', $post['cid'])->where('status = ?', 'publish'));
-                if(sizeof($temp)>0) {
+        if ($mid == 99999999) {
+            $posts = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'type', 'slug', 'commentsNum')->from('table.contents')->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time())->order('table.contents.created', Typecho_Db::SORT_DESC)->limit(10));
+            foreach ($posts as $post) {
+                $temp = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'commentsNum', 'views', 'likes')->from('table.contents')->where('cid = ?', $post['cid'])->where('status = ?', 'publish'));
+                if (sizeof($temp) > 0) {
                     $temp['0']['thumb'] = $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $post['cid']));
-                    array_push($select,$temp[0]);
+                    array_push($select, $temp[0]);
                 }
             }
-            if(sizeof($posts)>0) {
+            if (sizeof($posts) > 0) {
                 $this->export($select);
             } else {
                 $this->export(null);
             }
-        }
-        else if($mid>=0)
-        {
-            $categoryListWidget = $this->widget('Widget_Metas_Category_List', 'current='.$mid);
+        } else if ($mid >= 0) {
+            $categoryListWidget = $this->widget('Widget_Metas_Category_List', 'current=' . $mid);
             $children = $categoryListWidget->getAllChildren($mid);
             $children[] = $mid;
             $limit = 0;
-            if($except != 'null') {
-                $posts = $this->db->fetchAll($this->db->select('cid','mid')->from('table.relationships')->where('mid IN ?', $children)->where('cid != ?', $except));
+            if ($except != 'null') {
+                $posts = $this->db->fetchAll($this->db->select('cid', 'mid')->from('table.relationships')->where('mid IN ?', $children)->where('cid != ?', $except));
             } else {
-                $posts = $this->db->fetchAll($this->db->select('cid','mid')->from('table.relationships')->where('mid IN ?', $children));
+                $posts = $this->db->fetchAll($this->db->select('cid', 'mid')->from('table.relationships')->where('mid IN ?', $children));
             }
-            foreach($posts as $post) {
-                $temp = $this->db->fetchAll($this->db->select('cid', 'title', 'created','commentsNum', 'views', 'likes')->from('table.contents')->where('cid = ?', $post['cid'])->where('status = ?', 'publish'));
-                if(sizeof($temp)>0) {
+            foreach ($posts as $post) {
+                $temp = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'commentsNum', 'views', 'likes')->from('table.contents')->where('cid = ?', $post['cid'])->where('status = ?', 'publish'));
+                if (sizeof($temp) > 0) {
                     $temp['0']['thumb'] = $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $post['cid']));
-                    array_unshift($select,$temp[0]);
+                    array_unshift($select, $temp[0]);
                 }
                 $limit++;
             }
             $overflow = sizeof($select) - $pageSize;
-            for($cnt = 0; $cnt < $overflow; $cnt++) {
+            for ($cnt = 0; $cnt < $overflow; $cnt++) {
                 array_pop($select);
             }
-            if(sizeof($posts)>0) {
+            if (sizeof($posts) > 0) {
                 $this->export($select);
             } else {
                 $this->export(null);
@@ -502,22 +500,21 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
     private function search()
     {
         $keyword = self::GET('keyword', 'null');
-        if($keyword != 'null')
-        {
+        if ($keyword != 'null') {
             $cids = $this->db->fetchAll($this->db->select('cid')->from('table.contents')->where('text LIKE ?', '%' . $keyword . '%'));
-            if(sizeof($cids)>0){
-                foreach($cids as $cid) {
-                    $post = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'type', 'slug','commentsNum')->from('table.contents')->where('cid = ?', $cid)->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time()));
-                    if(sizeof($post)>0 && $post[0]!=null) {
+            if (sizeof($cids) > 0) {
+                foreach ($cids as $cid) {
+                    $post = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'type', 'slug', 'commentsNum')->from('table.contents')->where('cid = ?', $cid)->where('type = ?', 'post')->where('status = ?', 'publish')->where('created < ?', time()));
+                    if (sizeof($post) > 0 && $post[0] != null) {
                         $post[0]        = $this->widget("Widget_Abstract_Contents")->push($post[0]);
                         $post[0]['tag'] = $this->db->fetchAll($this->db->select('name')->from('table.metas')->join('table.relationships', 'table.metas.mid = table.relationships.mid', Typecho_DB::LEFT_JOIN)->where('table.relationships.cid = ?', $cid)->where('table.metas.type = ?', 'tag'));
-                        $post[0]['thumb'] = $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $cid))?$this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $cid)):array(array("str_value"=>"https://api.isoyu.com/bing_images.php"));
+                        $post[0]['thumb'] = $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $cid)) ? $this->db->fetchAll($this->db->select('str_value')->from('table.fields')->where('cid = ?', $cid)) : array(array("str_value" => "https://api.isoyu.com/bing_images.php"));
                         $post[0]['views'] = $this->db->fetchAll($this->db->select('views')->from('table.contents')->where('table.contents.cid = ?', $cid));
                         $post[0]['likes'] = $this->db->fetchAll($this->db->select('likes')->from('table.contents')->where('table.contents.cid = ?', $cid));
                         $result[]    = $post[0];
                     }
                 }
-                if(sizeof($result)>0) {
+                if (sizeof($result) > 0) {
                     $this->export($result);
                 } else {
                     $this->export("none");
@@ -525,9 +522,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
             } else {
                 $this->export("none");
             }
-        }
-        else
-        {
+        } else {
             $this->export(null);
         }
     }
@@ -537,21 +532,21 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         self::checkApisec($sec);
 
         $swipe = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->swipePosts;
-        $cids = explode(",",$swipe);
+        $cids = explode(",", $swipe);
         $result = array();
-        if(sizeof($cids)>0){
-            foreach($cids as $cid) {
-                $post = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'type', 'slug','commentsNum')->from('table.contents')->where('cid = ?', $cid)->where('status = ?', 'publish')->where('type = ?', 'post')->where('created < ?', time()));
-                if(sizeof($post)>0 && $post[0]!=null) {
+        if (sizeof($cids) > 0) {
+            foreach ($cids as $cid) {
+                $post = $this->db->fetchAll($this->db->select('cid', 'title', 'created', 'type', 'slug', 'commentsNum')->from('table.contents')->where('cid = ?', $cid)->where('status = ?', 'publish')->where('type = ?', 'post')->where('created < ?', time()));
+                if (sizeof($post) > 0 && $post[0] != null) {
                     $post[0]        = $this->widget("Widget_Abstract_Contents")->push($post[0]);
                     $post[0]['tag'] = $this->db->fetchAll($this->db->select('name')->from('table.metas')->join('table.relationships', 'table.metas.mid = table.relationships.mid', Typecho_DB::LEFT_JOIN)->where('table.relationships.cid = ?', $cid)->where('table.metas.type = ?', 'tag'));
-                    $post[0]['thumb'] = $this->db->fetchAll($this->db->select('name','str_value')->from('table.fields')->where('cid = ?', $cid))?$this->db->fetchAll($this->db->select('name', 'str_value')->from('table.fields')->where('cid = ?', $cid)):array(array("name"=>"thumb", "str_value"=>"https://api.isoyu.com/bing_images.php"));
+                    $post[0]['thumb'] = $this->db->fetchAll($this->db->select('name', 'str_value')->from('table.fields')->where('cid = ?', $cid)) ? $this->db->fetchAll($this->db->select('name', 'str_value')->from('table.fields')->where('cid = ?', $cid)) : array(array("name" => "thumb", "str_value" => "https://api.isoyu.com/bing_images.php"));
                     $post[0]['views'] = $this->db->fetchAll($this->db->select('views')->from('table.contents')->where('table.contents.cid = ?', $cid));
                     $post[0]['likes'] = $this->db->fetchAll($this->db->select('likes')->from('table.contents')->where('table.contents.cid = ?', $cid));
                     $result[]    = $post[0];
                 }
             }
-            if(sizeof($result)>0) {
+            if (sizeof($result) > 0) {
                 $this->export($result);
             } else {
                 $this->export(null);
@@ -566,33 +561,27 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         $sec = self::GET('apisec', 'null');
         self::checkApisec($sec);
         $cid = self::GET('cid', -1);
-        $comments = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg', 'mail')->from('table.comments')->where('cid = ?', $cid)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
+        $comments = $this->db->fetchAll($this->db->select('cid', 'coid', 'created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
         $result = array();
         //获取根评论
         foreach ($comments as $comment) {
-            // if($comment['authorImg'] == null){
-                // $comment['authorImg'] = 'https://secure.gravatar.com/avatar/' . md5(strtolower(trim($comment['mail']))) . '?d=https://idealclover.top/usr/themes/clover/assets/default.jpg';
-            // }
-            if($comment['parent'] == 0) {
+            if ($comment['parent'] == 0) {
                 $result[] = $comment;
             }
         }
         //获取子评论
-        foreach($comments as $comment) {
-            if($comment['parent'] != 0) {
+        foreach ($comments as $comment) {
+            if ($comment['parent'] != 0) {
                 $parent = $comment['parent'];
-                $temp = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg', 'mail')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $parent)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
-                if(sizeof($temp)>0)
-                {
-                    while($temp[0]['parent']!=0)
-                    {
+                $temp = $this->db->fetchAll($this->db->select('cid', 'coid', 'created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $parent)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
+                if (sizeof($temp) > 0) {
+                    while ($temp[0]['parent'] != 0) {
                         $parent = $temp[0]['parent'];
-                        $temp = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $parent)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
+                        $temp = $this->db->fetchAll($this->db->select('cid', 'coid', 'created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $parent)->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
                     }
-                    for($i=0; $i<sizeof($result);$i++)
-                    {
-                        if($result[$i]['coid'] == $temp[0]['coid']) {
-                            $comment['parentitem'] = $this->db->fetchAll($this->db->select('cid','coid','created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $comment['parent'])->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
+                    for ($i = 0; $i < sizeof($result); $i++) {
+                        if ($result[$i]['coid'] == $temp[0]['coid']) {
+                            $comment['parentitem'] = $this->db->fetchAll($this->db->select('cid', 'coid', 'created', 'author', 'text', 'parent', 'authorImg')->from('table.comments')->where('cid = ?', $cid)->where('coid = ?', $comment['parent'])->where('status = ?', 'approved')->order('table.comments.created', Typecho_Db::SORT_DESC));
                             $result[$i]['replays'][] = $comment;
                         }
                     }
@@ -601,17 +590,20 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do {
         }
         $this->export($result);
     }
-    public function export($data = array(), $status = 200) {
+    public function export($data = array(), $status = 200)
+    {
         $this->res->throwJson(array(
             'status' => $status,
             'data' => $data
         ));
         exit;
     }
-    public static function GET($key, $default = '') {
+    public static function GET($key, $default = '')
+    {
         return isset($_GET[$key]) ? $_GET[$key] : $default;
     }
-    public function action() {
+    public function action()
+    {
         $this->on($this->request);
     }
 }

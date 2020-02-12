@@ -43,6 +43,9 @@
     ],
     "backgroundColor": "#EFEFEF"
   },
+  "usingComponents": {
+    "cu-custom": "/libs/colorui/components/cu-custom"
+  },
   "networkTimeout": {
     "connectSocket": 60000,
     "request": 50000,

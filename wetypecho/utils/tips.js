@@ -3,112 +3,112 @@ var isLoading = false;
  * 弹出提示框
  */
 module.exports = {
-success(title, duration = 500) {
+  success(title, duration = 500) {
     setTimeout(() => {
-    wx.showToast({
+      wx.showToast({
         title: title,
         icon: "success",
         mask: true,
         duration: duration
-    });
+      });
     }, 300);
     if (duration > 0) {
-    return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         setTimeout(() => {
-        resolve();
+          resolve();
         }, duration);
-    });
+      });
     }
-},
+  },
 
-toast(title, onHide, icon = "success") {
+  toast(title, onHide, icon = "success") {
     setTimeout(() => {
-    wx.showToast({
+      wx.showToast({
         title: title,
         icon: icon,
         mask: true,
         duration: 500
-    });
+      });
     }, 300);
 
     // 隐藏结束回调
     if (onHide) {
-    setTimeout(() => {
+      setTimeout(() => {
         onHide();
-    }, 500);
+      }, 500);
     }
-},
+  },
 
-// /**
-//  * 警告框
-//  */
-// alert(title) {
-//     wx.showToast({
-//     title: title,
-//     image: "../images/alert.png",
-//     mask: true,
-//     duration: 1500
-//     });
-// },
+  // /**
+  //  * 警告框
+  //  */
+  // alert(title) {
+  //     wx.showToast({
+  //     title: title,
+  //     image: "../images/alert.png",
+  //     mask: true,
+  //     duration: 1500
+  //     });
+  // },
 
-// /**
-//  * 错误框
-//  */
+  // /**
+  //  * 错误框
+  //  */
 
-// error(title, onHide) {
-//     wx.showToast({
-//     title: title,
-//     image: "../images/error.png",
-//     mask: true,
-//     duration: 500
-//     });
-//     // 隐藏结束回调
-//     if (onHide) {
-//     setTimeout(() => {
-//         onHide();
-//     }, 500);
-//     }
-// },
+  // error(title, onHide) {
+  //     wx.showToast({
+  //     title: title,
+  //     image: "../images/error.png",
+  //     mask: true,
+  //     duration: 500
+  //     });
+  //     // 隐藏结束回调
+  //     if (onHide) {
+  //     setTimeout(() => {
+  //         onHide();
+  //     }, 500);
+  //     }
+  // },
 
-loading(title = "加载中") {
+  loading(title = "加载中") {
     if (isLoading) {
-        return;
+      return;
     }
     isLoading = true;
     wx.showLoading({
-    title: title,
-    mask: true,
+      title: title,
+      mask: true
     });
-},
+  },
 
-loaded() {
+  loaded() {
     if (isLoading) {
-        isLoading = false;
-        wx.hideLoading();
+      isLoading = false;
+      wx.hideLoading();
     }
-},
+  },
 
-loadfailed(str) {
+  loadfailed(str) {
     if (isLoading) {
-    isLoading = false;
-    wx.hideLoading();
-    wx.showToast({
+      isLoading = false;
+      wx.hideLoading();
+      wx.showToast({
         title: str,
-        image: '../resources/error.png',
+        image: "../resources/error.png",
         mask: true,
         duration: 2000
-    });
+      });
     }
-},
+  },
 
-share(title, url, desc) {
+  share(title, url, desc) {
     return {
-    title: title,
-    path: url,
-    desc: desc,
-    success: function(res) {
+      title: title,
+      path: url,
+      desc: desc,
+      success: function(res) {
         Tips.toast("分享成功");
-    }
+      }
     };
-    }
-}
+  }
+};
