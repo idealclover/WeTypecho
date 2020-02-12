@@ -102,7 +102,8 @@ module.exports = {
         "&gender=" +
         userInfo.gender +
         "&province=" +
-        userInfo.province
+        userInfo.province +
+        "&mp=" + cfg.getmp
     );
   },
   Getuserlikedinfo: function(cid, openid) {

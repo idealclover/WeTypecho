@@ -99,6 +99,10 @@ class WeTypecho_Plugin implements Typecho_Plugin_Interface
         $form->addInput($appID);
         $appSecret = new Typecho_Widget_Helper_Form_Element_Text('appsecret', NULL, 'xxx', _t('微信小程序的APP secret ID'),  _t('小程序的APP secret ID'));
         $form->addInput($appSecret);
+        $qqAppID = new Typecho_Widget_Helper_Form_Element_Text('qqAppid', NULL, 'xxx', _t('QQ 小程序的APPID'),  _t('小程序的APP ID'));
+        $form->addInput($qqAppID);
+        $qqAppSecret = new Typecho_Widget_Helper_Form_Element_Text('qqAppsecret', NULL, 'xxx', _t('QQ 小程序的APP secret ID'),  _t('小程序的APP secret ID'));
+        $form->addInput($qqAppSecret);
         $aboutCid = new Typecho_Widget_Helper_Form_Element_Text('aboutCid', NULL, '1', _t('关于页面CID'),  _t('小程序关于页面显示内容'));
         $form->addInput($aboutCid);
         $monitorOid = new Typecho_Widget_Helper_Form_Element_Text('monitorOid', NULL, '1', _t('资源监控所允许的微信openid'),  _t('资源监控所允许的微信openid，可在wetypecho控制台查看自己Openid来添加'));

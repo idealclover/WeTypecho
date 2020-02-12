@@ -13,6 +13,8 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->apisecret = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->apiSecret;
         $this->appid = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->appid;
         $this->appsecret = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->appsecret;
+        $this->qqAppid = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->qqAppid;
+        $this->qqAppsecret = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->qqAppsecret;
         $swipe = Typecho_Widget::widget('Widget_Options')->plugin('WeTypecho')->swipePosts;
         if (method_exists($this, $this->request->type)) {
             call_user_func(array(
@@ -370,6 +372,7 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do
         self::checkApisec($sec);
 
         $code = self::GET('code', 'null');
+        $mp = self::GET('mp', 'weixin');
         if ($code != 'null') {
             $nickname = self::GET('nickname', 'null');
             $avatarUrl = self::GET('avatarUrl', 'null');
@@ -377,7 +380,8 @@ class WeTypecho_Action extends Typecho_Widget implements Widget_Interface_Do
             $country = self::GET('country', 'null');
             $gender = self::GET('gender', 'null');
             $province = self::GET('province', 'null');
-            $url = sprintf('https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code', $this->appid, $this->appsecret, $code);
+            if($mp == 'weixin') $url = sprintf('https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code', $this->appid, $this->appsecret, $code);
+            else if($mp == 'qq') $url = sprintf('https://api.q.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code', $this->qqAppid, $this->qqAppsecret, $code);
             $info = file_get_contents($url);
             $json = json_decode($info); //对json数据解码
             $arr = get_object_vars($json);
