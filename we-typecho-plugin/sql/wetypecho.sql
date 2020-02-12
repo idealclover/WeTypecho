@@ -9,6 +9,5 @@ CREATE TABLE `typecho_wetypecho` (
   `country`           varchar(255)      default ''  ,
   `gender`            varchar(255)      default ''  ,
   `province`          varchar(255)     default ''  ,
-  `formid`          varchar(255)     default ''  ,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
