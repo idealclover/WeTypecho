@@ -1,3 +1,6 @@
+@import "libs/colorui/main.wxss";
+@import "libs/colorui/icon.wxss";
+
 /* 基础样式 */
 
 view,
