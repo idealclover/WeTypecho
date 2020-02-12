@@ -17,6 +17,7 @@
 	"isGameTourist": false,
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
+	"qqappid": "1110175281",
 	"condition": {
 		"search": {
 			"current": -1,

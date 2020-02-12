@@ -112,7 +112,7 @@
                 </button> -->
                 <!-- <text class="cmicontext">转发</text> -->
             <!-- </view> -->
-            <button class="cmview" open-type="share" plain='true' type="primary"  style="border:none; margin-top:5rpx; margin-left:15rpx; padding:0px; width:auto; display:{{item.showshare == 1 ? 'flex' : 'none'}};">
+            <button class="cmview" open-type="share" plain='true' style="border:none; margin-top:5rpx; margin-left:15rpx; padding:0px; width:auto; display:{{item.showshare == 1 ? 'flex' : 'none'}};">
                 <image src='../../resources/resend.png' class="img-plus" mode="scaleToFill"></image>
                 <text class="cmicontext" style='margin-top:-12rpx;'>转发</text>
             </button>
